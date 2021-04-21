@@ -7,6 +7,14 @@
 <body>
     <!--ビュー（V）ファイル　index.phpを参照して使っている-->
     <h1>ユーザー一覧</h1>
+    
+    <p>
+        <form action="search.php">
+            <input type="search" name="name">
+            <button type="submit">検索</button>
+        </form>    
+    </p>
+    
     <link rel="stylesheet" href="style.css">
     <?php if($flash_message !== null): ?>
     <p><?= $flash_message ?></p>

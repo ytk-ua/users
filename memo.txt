@@ -111,4 +111,14 @@ git add .
 git commit -m "xxxx"
 git log
 
-git reset --hard xxxx
+git reset --hard a1c714756a6b1b59d540970524273a3cc56dde1c
+
+git remote add origin https://github.com/ytk-ua/users.git
+git branch -M main
+git push -u origin main
+
+以下繰り返し
+
+git add .
+git commit -m "search done"
+git push origin main
