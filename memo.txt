@@ -1,0 +1,114 @@
+## ---- PHP/MySQL 設定(AWS Amazon Linux) ----
+
+-- 現状のPHPバージョン確認
+php --version
+# Amazon Linux default
+# PHP 5.6.40
+
+-- PHPのバージョンアップ
+sudo yum update -y
+sudo yum -y install php72 php72-mbstring php72-pdo php72-intl php72-pdo_mysql php72-pdo_pgsql php72-xdebug php72-opcache php72-apcu
+sudo unlink /usr/bin/php
+sudo ln -s /etc/alternatives/php7 /usr/bin/php
+
+php --version
+# PHP 7.2.34 (cli) (built: Oct 21 2020 19:52:01) ( NTS )
+
+-- PDOがインストールされているか確認
+php -m | grep pdo
+
+-- 現状の MySQLバージョン確認
+mysql --version
+# mysql  Ver 14.14 Distrib 5.5.62, for Linux (x86_64) using readline 5.1
+
+## ---- Cloud9のワークスペースのシステム時間変更
+-- 現在のシステム時間確認
+date
+echo "Asia/Tokyo" | sudo tee /etc/timezone
+sudo mysql_tzinfo_to_sql /usr/share/zoneinfo
+sudo cp /etc/sysconfig/clock /etc/sysconfig/clock.org
+
+-- ファイル編集
+sudo vi /etc/sysconfig/clock
+## 以下書き換え
+ZONE="Asia/Tokyo"
+
+sudo ln -sf /usr/share/zoneinfo/Asia/Tokyo /etc/localtime
+
+-- Cloud9ワークスペース再起動
+sudo reboot
+-- 再度システム時間確認
+date
+
+## ----- MySQL操作 -----
+
+# -- 文字化け対策
+
+-- MySQL起動 for Amazon Linux
+sudo service mysqld start
+# for Amazon Linux2
+# ref) https://qiita.com/yut-nagase/items/780d68a15b05c50c0a42
+sudo yum install -y mariadb-server
+sudo systemctl start mariadb
+
+-- 管理者権限でログイン
+mysql -u root
+
+-- 現状の文字コード確認
+show variables like '%char%';
+-- ログアウト
+exit;
+
+-- 文字化けしないように文字コード設定変更
+sed -e "/utf8/d" -e "/client/d" -e "/^\[mysqld_safe\]$/i character-set-server=utf8\n\n[client]\ndefault-character-set=utf8" /etc/my.cnf |sudo tee /etc/my.cnf
+
+-- MySQL再起動
+sudo service mysqld restart
+# for Amazon Linux2
+sudo systemctl restart mariadb
+
+-- 再度管理者でログイン
+mysql -u root
+
+-- 最新の文字コード確認
+show variables like '%char%';
+
+-- データベース一覧表示
+show databases;
+
+-- データベース作成
+create database users_app default character set utf8;
+
+-- 再度データベース一覧表示
+show databases;
+
+-- データベース選択
+use users_app;
+
+-- テーブル作成
+create table users(
+    id int auto_increment primary key,
+    name varchar(255) not null,
+    age int not null,
+    created_at timestamp default CURRENT_TIMESTAMP
+);
+
+-- テーブルの構造確認
+desc users;
+
+-- ダミーデータ挿入
+insert into users(name, age) values('watanabe', 22);
+
+-- 実データ表示
+select * from users;
+
+### -- Git/Github
+git init
+git config --list
+git config --global user.name "tokunaga"
+git config --global user.email "ytk.ua.914@gmail.com"
+git add .
+git commit -m "xxxx"
+git log
+
+git reset --hard xxxx
